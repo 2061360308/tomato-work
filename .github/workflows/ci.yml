@@ -11,7 +11,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
@@ -30,10 +30,10 @@ jobs:
         run: pnpm run build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           path: './build' # 这里要根据你的项目实际构建输出目录修改
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1    
+        uses: actions/deploy-pages@v2    
