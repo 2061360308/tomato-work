@@ -1,39 +1,59 @@
-name: Build and Deploy to GitHub Pages
+# 用于构建和部署Hugo网站到GitHub Pages的示例工作流程
+name: 发布Hugo网站到Pages
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  build-and-deploy:
+  build:
+    environment:
+      name: github-pages
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
+    env:
+      HUGO_VERSION: 0.139.3
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3 # If you're using actions/checkout@v2 you must set persist-credentials to false in most cases for the deployment to work correctly.
         with:
           persist-credentials: false
-
-      - name: Install pnpm
+      - name: Install
         uses: pnpm/action-setup@v4
         with:
           version: 8
-
-      - name: Install Dependencies
-        run: pnpm install
-
+      - name: Install
+        run: |
+          pnpm install
       - name: Lint
-        run: pnpm run lint
-
+        run: |
+          pnpm run lint
       - name: Build
-        run: pnpm run build
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        run: |
+          pnpm run build
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: './build' # 这里要根据你的项目实际构建输出目录修改
+          path: ./build
 
-      - name: Deploy to GitHub Pages
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: 部署到GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2    
+        uses: actions/deploy-pages@v4
